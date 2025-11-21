@@ -73,39 +73,37 @@ npm run dev
 
 ## 🌐 API Configuration
 
-The project connects to the backend via Axios.
+The project connects to the backend via Axios and uses environment variables to determine which API to use based on the deployment environment.
+
+### Environment-Based API URLs
+
+- **Production (main branch)**: `https://meli-ecommerce-orders-api.onrender.com/api/v1`
+- **Staging (staging branch)**: `https://meli-ecommerce-staging.onrender.com/api/v1`
+- **Local Development**: Falls back to `http://localhost:8080/api/v1` if `VITE_API_BASE_URL` is not set
 
 ### `/src/api/ordersApi.js`
+
+The API configuration uses `VITE_API_BASE_URL` environment variable:
 
 ```js
 import axios from "axios";
 
-const BASE_URL = "http://localhost:8080/api/v1";
+const BASE_URL = import.meta.env.VITE_API_BASE_URL || "http://localhost:8080/api/v1";
 
 export const api = axios.create({
   baseURL: BASE_URL,
   headers: { "Content-Type": "application/json" },
 });
-
-export async function getOrders() {
-  const response = await api.get("/orders");
-  return response.data;
-}
-
-export async function safeGetOrders() {
-  try {
-    return await getOrders();
-  } catch (error) {
-    console.error("Error fetching orders:", error);
-    throw error;
-  }
-}
-
-export async function createOrder(orderPayload) {
-  const res = await api.post("/orders", orderPayload);
-  return res.data;
-}
 ```
+
+### Configuring Environment Variables in Vercel
+
+For detailed instructions on setting up environment variables in Vercel to automatically switch between production and staging APIs based on Git branch, see [VERCEL_ENV_SETUP.md](./VERCEL_ENV_SETUP.md).
+
+**Quick Setup:**
+1. Go to Vercel Dashboard → Your Project → Settings → Environment Variables
+2. Add `VITE_API_BASE_URL` for **Production** environment: `https://meli-ecommerce-orders-api.onrender.com/api/v1`
+3. Add `VITE_API_BASE_URL` for **Preview** environment with branch `staging`: `https://meli-ecommerce-staging.onrender.com/api/v1`
 
 ---
 
