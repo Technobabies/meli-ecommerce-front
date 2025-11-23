@@ -17,7 +17,8 @@ It provides a user interface to view, create, and manage orders through a RESTfu
 
 ## 🚀 Features
 
-- Create new orders with validated payloads  
+- Create new orders with validated payloads
+- Shopping cart with credit card payment form and client-side validation
 - Manage products dynamically  
 - Well-structured API service layer using Axios  
 - Unit tests with Jest for reliability
@@ -52,7 +53,16 @@ src/
 | Backend | [Meli E-Commerce Orders API (Spring Boot)](https://github.com/your-backend-link) |
 
 ---
+### Payment Validation (Cart)
 
+The Shopping Cart page includes a credit card payment form with basic client-side validation:
+
+- Card number: numeric input only, 16 digits.
+- CVV: numeric input only, 3–4 digits.
+- Expiration date: month between 1 and 12, year not in the past.
+- All fields are required.
+
+No real payments are processed — this module only validates the data entered by the user on the frontend.
 ## 📦 Installation
 
 Clone the repository and install dependencies:
