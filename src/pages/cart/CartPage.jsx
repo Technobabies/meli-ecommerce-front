@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useCart, useCartDispatch } from "../../context/CartContext";
 import { createOrder } from "../../api/ordersApi";
-import { DUMMY_USER_ID } from "../../data/dummyProducts";
+import { CARDS_USER_ID } from "../../data/dummyProducts";
 
 export default function CartPage() {
   const { items } = useCart();
@@ -15,7 +15,7 @@ export default function CartPage() {
     if (!items.length) return;
 
     const order = {
-      createdBy: DUMMY_USER_ID,
+      createdBy: CARDS_USER_ID,
       items: items.map(i => ({
         productId: i.productId,
         productName: i.productName,
