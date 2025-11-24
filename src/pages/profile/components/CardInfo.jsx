@@ -2,10 +2,10 @@ import { useState } from "react";
 import { useFetchCards } from "../../../hooks/useFetchCards";
 import { createCard, updateCard, deleteCard } from "../../../api/cardsApi";
 import CardModal from "../../../components/CardModal";
-import { DUMMY_USER_ID } from "../../../data/dummyProducts"; // o tu userId real
+import { CARDS_USER_ID } from "../../../data/dummyProducts"; // Hardcoded user for cards API
 
 export default function CardInfo() {
-  const { cards, loading, error, refetch } = useFetchCards(DUMMY_USER_ID);
+  const { cards, loading, error, refetch } = useFetchCards(CARDS_USER_ID);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingCard, setEditingCard] = useState(null);
   const [saveError, setSaveError] = useState(null);
@@ -17,7 +17,7 @@ export default function CardInfo() {
       if (editingCard) {
         await updateCard(editingCard.id, cardData);
       } else if (cards.length < 3) {
-        await createCard(DUMMY_USER_ID, cardData);
+        await createCard(CARDS_USER_ID, cardData);
       } else {
         setSaveError("No puedes agregar más de 3 tarjetas.");
         return;

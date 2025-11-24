@@ -9,6 +9,9 @@ if (!userId) {
 }
 export const DUMMY_USER_ID = userId;
 
+// Hardcoded user ID specifically for cards API (must match existing user in database)
+export const CARDS_USER_ID = "11111111-1111-1111-1111-111111111111";
+
 export const PRODUCTS = [
   { id: "prod-1", name: "Wireless Mouse", price: 25.99, category: "Electronics" },
   { id: "prod-2", name: "Mechanical Keyboard", price: 89.5, category: "Electronics" },
