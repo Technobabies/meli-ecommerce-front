@@ -1,57 +1,77 @@
 import { useState } from "react";
+import { useFetchCards } from "../../../hooks/useFetchCards";
+import { createCard, updateCard, deleteCard } from "../../../api/cardsApi";
 import CardModal from "../../../components/CardModal";
+import { DUMMY_USER_ID } from "../../../data/dummyProducts"; // o tu userId real
 
 export default function CardInfo() {
-  const [cards, setCards] = useState([
-    {
-      id: 1,
-      cardholderName: "John Doe",
-      cardNumber: "**** **** **** 1234",
-      expirationDate: "12/26",
-    },
-    {
-      id: 2,
-      cardholderName: "John Doe",
-      cardNumber: "**** **** **** 5678",
-      expirationDate: "10/25",
-    },
-    {
-      id: 3,
-      cardholderName: "John Doe",
-      cardNumber: "**** **** **** 9123",
-      expirationDate: "10/25",
-    },
-  ]);
-
+  const { cards, loading, error, refetch } = useFetchCards(DUMMY_USER_ID);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingCard, setEditingCard] = useState(null);
+  const [saveError, setSaveError] = useState(null);
 
-  const handleSaveCard = (cardData) => {
-    if (editingCard)
-      setCards(
-        cards.map((card) =>
-          card.id === editingCard.id ? { ...card, ...cardData } : card
-        )
-      );
-    else if (cards.length < 3)
-      setCards([...cards, { ...cardData, id: Date.now() }]);
+  const handleSaveCard = async (cardData) => {
+    try {
+      setSaveError(null);
 
-    closeModal();
+      if (editingCard) {
+        await updateCard(editingCard.id, cardData);
+      } else if (cards.length < 3) {
+        await createCard(DUMMY_USER_ID, cardData);
+      } else {
+        setSaveError("No puedes agregar más de 3 tarjetas.");
+        return;
+      }
+
+      await refetch(); // recarga la lista de tarjetas
+      closeModal();
+    } catch (err) {
+      console.error("Error completo:", err);
+      console.error("Status:", err?.response?.status);
+      console.error("Data:", err?.response?.data);
+      console.error("Message:", err?.message);
+
+      const errorMessage =
+        err?.response?.data?.message ||
+        err?.message ||
+        "No se pudo guardar la tarjeta. Revisa los datos.";
+      setSaveError(errorMessage);
+    }
   };
 
-  const handleDeleteCard = (cardId) => {
-    setCards(cards.filter((card) => card.id !== cardId));
+  const handleDeleteCard = async (cardId) => {
+    if (!window.confirm("¿Estás seguro de que quieres eliminar esta tarjeta?")) {
+      return;
+    }
+
+    try {
+      setSaveError(null);
+      await deleteCard(cardId);
+      await refetch();
+    } catch (err) {
+      console.error("Error al eliminar:", err);
+      const errorMessage =
+        err?.response?.data?.message ||
+        err?.message ||
+        "No se pudo eliminar la tarjeta.";
+      setSaveError(errorMessage);
+    }
   };
 
   const openModal = (card = null) => {
     setEditingCard(card);
     setIsModalOpen(true);
+    setSaveError(null);
   };
 
   const closeModal = () => {
     setEditingCard(null);
     setIsModalOpen(false);
+    setSaveError(null);
   };
+
+  if (loading) return <p className="text-white">Cargando tarjetas...</p>;
+  if (error) return <p className="text-red-500">Error al cargar tarjetas</p>;
 
   return (
     <>
@@ -63,6 +83,14 @@ export default function CardInfo() {
       />
       <div className="bg-gray-800 shadow rounded-lg p-6">
         <h2 className="text-xl font-bold text-white mb-4">Payment Methods</h2>
+
+        {/* Mostrar error de guardado */}
+        {saveError && (
+          <div className="bg-red-500 bg-opacity-20 border border-red-500 text-red-300 px-4 py-3 rounded mb-4">
+            {saveError}
+          </div>
+        )}
+
         <div className="space-y-4">
           {cards.length === 0 ? (
             <div className="text-white">No cards found.</div>
@@ -74,7 +102,9 @@ export default function CardInfo() {
               >
                 <div>
                   <p className="font-bold text-white">{card.cardholderName}</p>
-                  <p className="text-gray-300">{card.cardNumber}</p>
+                  <p className="text-gray-300">
+                    {card.maskedCardNumber || "****"}
+                  </p>
                   <p className="text-gray-300">{card.expirationDate}</p>
                 </div>
                 <div className="flex space-x-2">
