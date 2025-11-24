@@ -24,16 +24,21 @@ export default function CartPage() {
       }))
     };
 
-    console.log(order);
+    console.log("🛒 Creating order:", order);
+    console.log("📦 Order items:", JSON.stringify(order.items, null, 2));
 
     try {
       setLoading(true);
       setStatus("");
-      await createOrder(order);
+      console.log("🚀 Sending order to API...");
+      const result = await createOrder(order);
+      console.log("✅ Order created successfully:", result);
       setStatus("Order created successfully!");
       dispatch({ type: "CLEAR" });
     } catch (err) {
-      console.error(err);
+      console.error("❌ Order creation failed:", err);
+      console.error("Response data:", err?.response?.data);
+      console.error("Status:", err?.response?.status);
       setStatus("Error creating order.");
     } finally {
       setLoading(false);

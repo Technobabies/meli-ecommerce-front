@@ -31,6 +31,9 @@ export async function safeGetOrders() {
 }
 
 export async function createOrder(orderPayload) {
+  console.log("📡 API call - Creating order with payload:", orderPayload);
+  console.log("🔗 API Base URL:", BASE_URL);
   const res = await api.post("/orders", orderPayload);
+  console.log("📥 API response:", res.data);
   return res.data;
 }
