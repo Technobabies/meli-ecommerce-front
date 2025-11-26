@@ -14,41 +14,8 @@ export default function CartPage() {
   const total = items.reduce((sum, i) => sum + i.pricePerUnit * i.quantity, 0);
 
   const goToCheckout = () => {
+    if (items.length === 0) return;
     navigate('/checkout-payment');
-  };
-
-  const handleCheckout = async () => {
-    if (!items.length) return;
-
-    const order = {
-      createdBy: CARDS_USER_ID,
-      items: items.map(i => ({
-        productId: i.productId,
-        productName: i.productName,
-        quantity: i.quantity,
-        pricePerUnit: i.pricePerUnit
-      }))
-    };
-
-    console.log("🛒 Creating order:", order);
-    console.log("📦 Order items:", JSON.stringify(order.items, null, 2));
-
-    try {
-      setLoading(true);
-      setStatus("");
-      console.log("🚀 Sending order to API...");
-      const result = await createOrder(order);
-      console.log("✅ Order created successfully:", result);
-      setStatus("Order created successfully!");
-      dispatch({ type: "CLEAR" });
-    } catch (err) {
-      console.error("❌ Order creation failed:", err);
-      console.error("Response data:", err?.response?.data);
-      console.error("Status:", err?.response?.status);
-      setStatus("Error creating order.");
-    } finally {
-      setLoading(false);
-    }
   };
 
   return (
