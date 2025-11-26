@@ -1,7 +1,7 @@
 export default function BasicInfo() {
   const user = {
-    name: "John Doe",
-    email: "john.doe@example.com",
+    name: "Dylan Doe",
+    email: "dylan.doe@example.com",
   };
 
   return (

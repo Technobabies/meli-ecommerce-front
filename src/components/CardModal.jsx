@@ -147,7 +147,7 @@ export default function CardModal({ isOpen, onClose, onSave, cardToEdit }) {
               type="text"
               value={cardholderName}
               onChange={(e) => setCardholderName(e.target.value)}
-              placeholder="John Doe"
+              placeholder="Dylan Doe"
               className="w-full p-2 rounded bg-gray-700 text-white border border-gray-600 focus:outline-none focus:border-blue-500"
             />
             {errors.cardholderName && (
