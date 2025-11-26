@@ -59,8 +59,19 @@ export default function CardModal({ isOpen, onClose, onSave, cardToEdit }) {
   useEffect(() => {
     if (isEditing && cardToEdit) {
       setCardholderName(cardToEdit.cardholderName || "");
-      // En edición, no mostramos el número completo por seguridad
-      setCardNumber("");
+      
+      // Mostrar número de tarjeta enmascarado en edición
+      // El backend devuelve maskedCardNumber, no cardNumber completo
+      if (cardToEdit.maskedCardNumber) {
+        setCardNumber(cardToEdit.maskedCardNumber);
+      } else if (cardToEdit.cardNumber) {
+        const lastFourDigits = cardToEdit.cardNumber.slice(-4);
+        const maskedCardNumber = "*".repeat(12) + lastFourDigits;
+        setCardNumber(maskedCardNumber);
+      } else {
+        setCardNumber("");
+      }
+      
       // Parsear expirationDate: si viene como "2025-12-01", extraer mes y año
       if (cardToEdit.expirationDate) {
         const parts = cardToEdit.expirationDate.split("-");
