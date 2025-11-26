@@ -135,7 +135,7 @@ export default function CardModal({ isOpen, onClose, onSave, cardToEdit }) {
   };
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center">
+    <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50">
       <div className="bg-gray-800 p-8 rounded-lg shadow-xl w-full max-w-md">
         <h2 className="text-2xl font-bold text-white mb-6">
           {isEditing ? "Edit Card" : "Add a New Card"}
