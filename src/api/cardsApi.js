@@ -57,13 +57,20 @@ export async function createCard(userId, cardPayload) {
  */
 export async function updateCard(cardId, cardPayload) {
   try {
-    const response = await api.put(`/cards/${cardId}`, cardPayload);
-    return response.data.data; // Devuelve objeto actualizado
+    // NO enviar cardNumber en un UPDATE
+    const payload = {
+      cardholderName: cardPayload.cardholderName,
+      expirationDate: cardPayload.expirationDate,
+    };
+
+    const response = await api.put(`/cards/${cardId}`, payload);
+    return response.data.data;
   } catch (error) {
     console.error("Error updating card:", error);
     throw error;
   }
 }
+
 
 /**
  * DELETE /cards/{cardId} - Eliminar tarjeta (soft delete)

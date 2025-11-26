@@ -17,29 +17,40 @@ export default function CardModal({ isOpen, onClose, onSave, cardToEdit }) {
     }
     // Validar exactamente 16 dígitos (sin enmascarar)
     const cleanCardNumber = cardNumber.replace(/\D/g, "");
-    if (!/^\d{16}$/.test(cleanCardNumber)) {
+    
+    //cambio aqui
+    if (!isEditing) {
+   if (!/^\d{16}$/.test(cleanCardNumber)) {
       newErrors.cardNumber = "Card number must be 16 digits.";
-    }
+      }
+    } //cambio aqui
+ 
 
     // Validar mes (01-12)
     if (!expirationMonth || !/^(0[1-9]|1[0-2])$/.test(expirationMonth)) {
       newErrors.expirationMonth = "Month must be 01-12.";
     }
 
-    // Validar año (2 dígitos, futuro)
+    // Validar año (2 dígitos, futuro, máximo 20 años)
     if (!expirationYear || !/^\d{2}$/.test(expirationYear)) {
       newErrors.expirationYear = "Year must be 2 digits (YY).";
     } else {
-      // Construir fecha de expiración: 20YY-MM-01
       const year = 2000 + parseInt(expirationYear);
       const month = parseInt(expirationMonth);
-
-      // Crear fecha del primer día del mes de expiración
-      const expiration = new Date(year, month - 1, 1, 23, 59, 59);
       const now = new Date();
+      const currentYear = now.getFullYear();
+      const maxYear = currentYear + 20;
 
-      if (expiration <= now) {
-        newErrors.expirationYear = "Card expiration must be in the future.";
+      // Validar que el año no sea mayor a 20 años desde el actual
+      if (year > maxYear) {
+        newErrors.expirationYear = `Expiration year cannot be more than 20 years in the future (max ${maxYear}).`;
+      } else {
+        // Crear fecha del último día del mes de expiración (23:59:59)
+        const expiration = new Date(year, month, 0, 23, 59, 59); // El día 0 del mes siguiente = último día del mes actual
+        
+        if (expiration <= now) {
+          newErrors.expirationYear = "Card expiration must be in the future.";
+        }
       }
     }
     return newErrors;
@@ -102,17 +113,30 @@ export default function CardModal({ isOpen, onClose, onSave, cardToEdit }) {
     if (Object.keys(newErrors).length === 0) {
       setIsSubmitting(true);
       try {
-        // Convertir MM/YY a YYYY-MM-01 (primer día del mes)
+        // Convertir MM/YY a YYYY-MM-DD (último día del mes)
         const year = 2000 + parseInt(expirationYear);
-        const month = expirationMonth.padStart(2, "0");
-        const expirationDate = `${year}-${month}-01`; // Formato: YYYY-MM-01
+        const month = parseInt(expirationMonth);
+        
+        // Obtener el último día del mes
+        const lastDay = new Date(year, month, 0).getDate();
+        const expirationDate = `${year}-${expirationMonth.padStart(2, "0")}-${lastDay.toString().padStart(2, "0")}`; // Formato: YYYY-MM-DD
 
         // Enviar datos en formato correcto para el backend
-        const cardData = {
-          cardholderName: cardholderName.trim(),
-          cardNumber: cardNumber, // Número completo sin enmascarar, 16 dígitos
-          expirationDate: expirationDate, // Formato YYYY-MM-01
-        };
+        let cardData;
+
+        if (isEditing) {
+          cardData = {
+            cardholderName: cardholderName.trim(),
+            expirationDate: expirationDate,  // SOLO esto acepta el back
+          };
+        } else {
+          cardData = {
+            cardholderName: cardholderName.trim(),
+            cardNumber: cardNumber,
+            expirationDate: expirationDate,
+          };
+        }
+         // Enviar datos en formato correcto para el backend
         await onSave(cardData);
       } catch (error) {
         console.error("Error in handleSubmit:", error);
@@ -122,20 +146,28 @@ export default function CardModal({ isOpen, onClose, onSave, cardToEdit }) {
     }
   };
 
-  const isFormValid = () => {
-    const cleanCardNumber = cardNumber.replace(/\D/g, "");
-    return (
-      Object.values(errors).every((error) => !error) &&
-      cardholderName.trim() &&
-      cleanCardNumber.length === 16 &&
-      expirationMonth &&
-      expirationYear &&
-      !isSubmitting
-    );
-  };
+const isFormValid = () => {
+  const cleanCardNumber = cardNumber.replace(/\D/g, "");
+  
+  // En edición, ignorar error de cardNumber
+  const relevantErrors = { ...errors };
+  if (isEditing) {
+    delete relevantErrors.cardNumber;
+  }
+  
+  return (
+    Object.values(relevantErrors).every((error) => !error) &&
+    cardholderName.trim() &&
+    expirationMonth &&
+    expirationYear &&
+    !isSubmitting &&
+    (isEditing || cleanCardNumber.length === 16)
+  );
+};
+
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50">
+    <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center">
       <div className="bg-gray-800 p-8 rounded-lg shadow-xl w-full max-w-md">
         <h2 className="text-2xl font-bold text-white mb-6">
           {isEditing ? "Edit Card" : "Add a New Card"}
@@ -147,7 +179,7 @@ export default function CardModal({ isOpen, onClose, onSave, cardToEdit }) {
               type="text"
               value={cardholderName}
               onChange={(e) => setCardholderName(e.target.value)}
-              placeholder="Dylan Doe"
+              placeholder="John Doe"
               className="w-full p-2 rounded bg-gray-700 text-white border border-gray-600 focus:outline-none focus:border-blue-500"
             />
             {errors.cardholderName && (
