@@ -105,7 +105,9 @@ export default function CardInfo() {
                   <p className="text-gray-300">
                     {card.maskedCardNumber || "****"}
                   </p>
-                  <p className="text-gray-300">{card.expirationDate}</p>
+                  <p className="text-gray-300">
+                    {card.expirationDate?.substring(0, 7) || ""}
+                  </p>
                 </div>
                 <div className="flex space-x-2">
                   <button
